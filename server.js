@@ -18,6 +18,8 @@ app.get("/api/health", (req, res) => {
 
 // Attach the authentication routes
 app.use("/api/auth", require("./src/routes/authRoutes"));
+app.use("/api/upload", require("./src/routes/uploadRoutes"));
+app.use("/api/menu", require("./src/routes/menuRoutes"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
