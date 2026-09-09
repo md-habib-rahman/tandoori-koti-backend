@@ -1,22 +1,26 @@
-const express = require("express");
-const router = express.Router();
-const { verifyToken } = require("../middlewares/auth");
-const {
+import { Router } from "express";
+import verifyToken from "../middlewares/auth.js";
+import {
   getRegularMenu,
-  createRegularItem,
-  deleteRegularItem,
   getBuffetSchedule,
+  createRegularItem,
+  updateRegularItem,
+  deleteRegularItem,
   assignBuffetMenu,
-} = require("../controllers/menuController");
+  deleteBuffetMenu,
+} from "../controllers/menuController.js";
+const router = Router();
 
-// Public Routes (For the restaurant website)
+// Public endpoints
 router.get("/regular", getRegularMenu);
 router.get("/buffet", getBuffetSchedule);
 
-// Protected Admin Routes (For the CMS Dashboard)
+// Protected admin endpoints
 router.post("/regular", verifyToken, createRegularItem);
+router.put("/regular/:id", verifyToken, updateRegularItem);
 router.delete("/regular/:id", verifyToken, deleteRegularItem);
 
 router.post("/buffet", verifyToken, assignBuffetMenu);
+router.delete("/buffet/:id", verifyToken, deleteBuffetMenu);
 
-module.exports = router;
+export default router;

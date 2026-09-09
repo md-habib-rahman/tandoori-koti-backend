@@ -1,10 +1,10 @@
-const express = require("express");
-const router = express.Router();
-const upload = require("../middlewares/upload");
-const { verifyToken } = require("../middlewares/auth");
-const { uploadImage } = require("../controllers/uploadController");
+import upload from "../middlewares/upload.js";
+import { Router } from "express";
+import verifyToken from "../middlewares/auth.js";
+import { uploadImage } from "../controllers/uploadController.js";
 
+const router = Router();
 // Protect the route and process a single file field named 'image'
 router.post("/", verifyToken, upload.single("image"), uploadImage);
 
-module.exports = router;
+export default router;

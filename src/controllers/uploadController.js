@@ -1,6 +1,6 @@
-const cloudinary = require("../config/cloudinary");
+import cloudinary from "../config/cloudinary.js";
 
-const uploadImage = async (req, res) => {
+export const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No image file provided." });
@@ -22,4 +22,4 @@ const uploadImage = async (req, res) => {
   }
 };
 
-module.exports = { uploadImage };
+

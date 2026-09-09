@@ -1,13 +1,13 @@
-const prisma = require("../config/db");
+import prisma from "../config/db.js";
 
 // ==========================================
-// REGULAR MENU (A La Carte)
+// REGULAR MENU (Bilingual A La Carte)
 // ==========================================
 
-const getRegularMenu = async (req, res) => {
+export const getRegularMenu = async (req, res) => {
   try {
     const menu = await prisma.regularMenu.findMany({
-      orderBy: { category: "asc" }, // Groups items by category alphabetically
+      orderBy: { categoryEn: "asc" },
     });
     res.status(200).json({ success: true, data: menu });
   } catch (error) {
@@ -15,27 +15,75 @@ const getRegularMenu = async (req, res) => {
   }
 };
 
-const createRegularItem = async (req, res) => {
+export const createRegularItem = async (req, res) => {
   try {
-    const { category, nameFi, nameEn, preparation, price, imageUrl } = req.body;
+    const {
+      categoryFi,
+      categoryEn,
+      nameFi,
+      nameEn,
+      preparationFi,
+      preparationEn,
+      price,
+      imageUrl,
+    } = req.body;
 
     const newItem = await prisma.regularMenu.create({
       data: {
-        category,
+        categoryFi,
+        categoryEn,
         nameFi,
         nameEn,
-        preparation,
+        preparationFi,
+        preparationEn,
         price: parseFloat(price),
-        imageUrl,
+        imageUrl: imageUrl || "",
       },
     });
+
     res.status(201).json({ success: true, data: newItem });
   } catch (error) {
+    console.error("Create Dish Error:", error);
     res.status(500).json({ error: "Failed to create item" });
   }
 };
 
-const deleteRegularItem = async (req, res) => {
+export const updateRegularItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      categoryFi,
+      categoryEn,
+      nameFi,
+      nameEn,
+      preparationFi,
+      preparationEn,
+      price,
+      imageUrl,
+    } = req.body;
+
+    const updatedItem = await prisma.regularMenu.update({
+      where: { id },
+      data: {
+        categoryFi,
+        categoryEn,
+        nameFi,
+        nameEn,
+        preparationFi,
+        preparationEn,
+        price: parseFloat(price),
+        ...(imageUrl && { imageUrl }),
+      },
+    });
+
+    res.status(200).json({ success: true, data: updatedItem });
+  } catch (error) {
+    console.error("Update Dish Error:", error);
+    res.status(500).json({ error: "Failed to update item" });
+  }
+};
+
+export const deleteRegularItem = async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.regularMenu.delete({ where: { id } });
@@ -49,11 +97,10 @@ const deleteRegularItem = async (req, res) => {
 // BUFFET MENU SYSTEM
 // ==========================================
 
-const getBuffetSchedule = async (req, res) => {
+export const getBuffetSchedule = async (req, res) => {
   try {
-    // Includes the nested BuffetItem data for each assigned menu
     const schedule = await prisma.buffetMenu.findMany({
-      include: { items: true },
+      include: { dishes: true },
       orderBy: { date: "asc" },
     });
     res.status(200).json({ success: true, data: schedule });
@@ -62,31 +109,56 @@ const getBuffetSchedule = async (req, res) => {
   }
 };
 
-const assignBuffetMenu = async (req, res) => {
+export const assignBuffetMenu = async (req, res) => {
   try {
-    const { date, weekday, itemIds } = req.body;
+    const { date, weekday, dishIds } = req.body;
+    const targetDate = new Date(date);
+    const dishConnections = (dishIds || []).map((id) => ({ id }));
 
-    const newMenu = await prisma.buffetMenu.create({
-      data: {
-        date: new Date(date), // Formats string to Prisma DateTime
-        weekday,
-        items: {
-          connect: itemIds.map((id) => ({ id })), // Links pre-stored items
-        },
-      },
-      include: { items: true },
+    const existingMenu = await prisma.buffetMenu.findFirst({
+      where: { date: targetDate },
     });
 
-    res.status(201).json({ success: true, data: newMenu });
+    let savedMenu;
+    if (existingMenu) {
+      savedMenu = await prisma.buffetMenu.update({
+        where: { id: existingMenu.id },
+        data: {
+          weekday,
+          dishes: {
+            set: dishConnections,
+          },
+        },
+        include: { dishes: true },
+      });
+    } else {
+      savedMenu = await prisma.buffetMenu.create({
+        data: {
+          date: targetDate,
+          weekday,
+          dishes: {
+            connect: dishConnections,
+          },
+        },
+        include: { dishes: true },
+      });
+    }
+
+    res.status(200).json({ success: true, data: savedMenu });
   } catch (error) {
+    console.error("Assign Buffet Error:", error);
     res.status(500).json({ error: "Failed to assign buffet" });
   }
 };
 
-module.exports = {
-  getRegularMenu,
-  createRegularItem,
-  deleteRegularItem,
-  getBuffetSchedule,
-  assignBuffetMenu,
+export const deleteBuffetMenu = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.buffetMenu.delete({ where: { id } });
+    res
+      .status(200)
+      .json({ success: true, message: "Scheduled buffet deleted" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete buffet" });
+  }
 };

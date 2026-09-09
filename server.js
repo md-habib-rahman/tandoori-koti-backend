@@ -1,12 +1,22 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+// import cors from "cors";
+import authRoutes from "./src/routes/authRoutes.js";
+import uploadRoutes from "./src/routes/uploadRoutes.js";
+import menuRoutes from "./src/routes/menuRoutes.js";
+import contactRoutes from "./src/routes/contactRoutes.js";
+import cors from "cors";
 
 const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: [
+      "http://localhost:3001",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
@@ -17,9 +27,10 @@ app.get("/api/health", (req, res) => {
 });
 
 // Attach the authentication routes
-app.use("/api/auth", require("./src/routes/authRoutes"));
-app.use("/api/upload", require("./src/routes/uploadRoutes"));
-app.use("/api/menu", require("./src/routes/menuRoutes"));
+app.use("/api/auth", authRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/menu", menuRoutes);
+app.use("/api/contact", contactRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

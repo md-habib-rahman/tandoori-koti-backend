@@ -1,6 +1,6 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const prisma = require("../config/db");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import prisma from "../config/db.js";
 
 const login = async (req, res) => {
   try {
@@ -47,6 +47,4 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = {
-  login,
-};
+export default login;
