@@ -32,7 +32,17 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/contact", contactRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Welcome to the Tandoori Koti API",
+    timestamp: new Date(),
+  });
 });
+
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
+
+export default app;
