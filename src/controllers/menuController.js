@@ -24,6 +24,8 @@ export const createRegularItem = async (req, res) => {
       nameEn,
       preparationFi,
       preparationEn,
+      storyFi,
+      storyEn,
       price,
       imageUrl,
     } = req.body;
@@ -36,6 +38,8 @@ export const createRegularItem = async (req, res) => {
         nameEn,
         preparationFi,
         preparationEn,
+        storyFi: storyFi || null,
+        storyEn: storyEn || null,
         price: parseFloat(price),
         imageUrl: imageUrl || "",
       },
@@ -58,6 +62,8 @@ export const updateRegularItem = async (req, res) => {
       nameEn,
       preparationFi,
       preparationEn,
+      storyFi,
+      storyEn,
       price,
       imageUrl,
     } = req.body;
@@ -65,14 +71,16 @@ export const updateRegularItem = async (req, res) => {
     const updatedItem = await prisma.regularMenu.update({
       where: { id },
       data: {
-        categoryFi,
-        categoryEn,
-        nameFi,
-        nameEn,
-        preparationFi,
-        preparationEn,
-        price: parseFloat(price),
-        ...(imageUrl && { imageUrl }),
+        ...(categoryFi !== undefined && { categoryFi }),
+        ...(categoryEn !== undefined && { categoryEn }),
+        ...(nameFi !== undefined && { nameFi }),
+        ...(nameEn !== undefined && { nameEn }),
+        ...(preparationFi !== undefined && { preparationFi }),
+        ...(preparationEn !== undefined && { preparationEn }),
+        ...(storyFi !== undefined && { storyFi: storyFi || null }),
+        ...(storyEn !== undefined && { storyEn: storyEn || null }),
+        ...(price !== undefined && { price: parseFloat(price) }),
+        ...(imageUrl !== undefined && { imageUrl }),
       },
     });
 

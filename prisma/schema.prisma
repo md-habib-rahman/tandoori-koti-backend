@@ -39,17 +39,22 @@ model ContactMessage {
 }
 
 model RegularMenu {
-    id            String   @id @default(uuid())
+    id            String @id @default(uuid())
     categoryFi    String // e.g. "Alkuruoat"
     categoryEn    String // e.g. "Starters"
     nameFi        String // e.g. "Voi Kana"
     nameEn        String // e.g. "Butter Chicken"
     preparationFi String // Finnish ingredients/description
     preparationEn String // English ingredients/description
-    price         Float
-    imageUrl      String
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+
+    // Story fields for the dish history / origin
+    storyFi String? @db.Text
+    storyEn String? @db.Text
+
+    price     Float
+    imageUrl  String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     buffetMenus BuffetMenu[]
 }
@@ -63,4 +68,28 @@ model BuffetMenu {
 
     // Linked directly to dishes added from the Add New Dish page
     dishes RegularMenu[]
+}
+
+enum ReservationStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
+    COMPLETED
+}
+
+model Reservation {
+    id              String            @id @default(cuid())
+    name            String
+    email           String
+    phone           String
+    guests          Int               @default(2)
+    reservationDate DateTime // Date and time of booking
+    specialRequests String?
+    status          ReservationStatus @default(PENDING)
+    adminNotes      String?
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+
+    @@index([reservationDate])
+    @@index([status])
 }

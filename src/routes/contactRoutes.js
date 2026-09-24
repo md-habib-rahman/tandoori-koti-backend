@@ -7,6 +7,7 @@ import {
 } from "../controllers/contactController.js";
 
 import verifyCaptcha from "../middlewares/verifyCaptcha.js";
+import verifyToken from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -14,8 +15,8 @@ const router = express.Router();
 router.post("/", verifyCaptcha, submitContactMessage);
 
 // Admin routes (attach your auth guards e.g., protect, adminOnly)
-router.get("/admin", getContactMessages);
-router.patch("/admin/:id/status", updateMessageStatus);
-router.delete("/admin/:id", deleteMessage);
+router.get("/admin", verifyToken, getContactMessages);
+router.patch("/admin/:id/status", verifyToken, updateMessageStatus);
+router.delete("/admin/:id", verifyToken, deleteMessage);
 
 export default router;
