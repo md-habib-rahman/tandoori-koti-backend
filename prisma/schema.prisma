@@ -125,7 +125,7 @@ model DeliveryOrder {
     totalPrice      Float
     status          DeliveryStatus @default(PENDING)
     paymentMethod   String         @default("CASH_ON_DELIVERY")
-    menuTotal       Float @default(0)
+    menuTotal       Float          @default(0)
     deliveryMedium  String?
     deliveryFee     Float?
     deliveredAt     DateTime?
@@ -189,6 +189,7 @@ model HeroBand {
 model Settings {
     id                  Int     @id @default(1)
     isDeliveryFee       Boolean @default(false)
+    isEnableDelivery    Boolean @default(false)
     deliveryFee         Int?
     isVat               Boolean @default(false)
     VatAmount           Int?

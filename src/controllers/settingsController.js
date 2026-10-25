@@ -72,6 +72,7 @@ function validateSettings(body) {
 function normalizeSettings(body) {
   return {
     isDeliveryFee: body.isDeliveryFee,
+    isEnableDelivery: body.isEnableDelivery,
     deliveryFee:
       body.deliveryFee === "" || body.deliveryFee == null
         ? null
