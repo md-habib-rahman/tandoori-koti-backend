@@ -1,4 +1,9 @@
 import prisma from "../config/db.js";
+import {
+  checkChefPickLimit,
+  parseChefPickFields,
+} from "../utils/chefPickFields.js";
+import { parseServingFields } from "../utils/servingFields.js";
 
 // ==========================================
 // REGULAR MENU (Bilingual A La Carte)
@@ -30,6 +35,34 @@ export const createRegularItem = async (req, res) => {
       imageUrl,
     } = req.body;
 
+    const serving = parseServingFields(req.body);
+    const chef = parseChefPickFields(req.body);
+    const errors = { ...(serving.errors || {}), ...(chef.errors || {}) };
+    if (Object.keys(errors).length) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid serving information.",
+        errors,
+      });
+    }
+
+    const limitError = await checkChefPickLimit(prisma, {
+      id: req.params.id, // leave this out in the create controller
+      isChefPick: chef.data.isChefPick,
+    });
+    if (limitError)
+      return res.status(400).json({ success: false, message: limitError });
+
+    // in createMenuItem / updateMenuItem, before the Prisma call:
+    // const serving = parseServingFields(req.body);
+    // if (serving.errors) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid serving information.",
+    //     errors: serving.errors,
+    //   });
+    // }
+
     const newItem = await prisma.regularMenu.create({
       data: {
         categoryFi,
@@ -42,6 +75,8 @@ export const createRegularItem = async (req, res) => {
         storyEn: storyEn || null,
         price: parseFloat(price),
         imageUrl: imageUrl || "",
+        ...serving.data,
+        ...chef.data,
       },
     });
 
@@ -68,6 +103,24 @@ export const updateRegularItem = async (req, res) => {
       imageUrl,
     } = req.body;
 
+    const serving = parseServingFields(req.body);
+    const chef = parseChefPickFields(req.body);
+    const errors = { ...(serving.errors || {}), ...(chef.errors || {}) };
+    if (Object.keys(errors).length) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid serving information.",
+        errors,
+      });
+    }
+
+    const limitError = await checkChefPickLimit(prisma, {
+      id: req.params.id, // leave this out in the create controller
+      isChefPick: chef.data.isChefPick,
+    });
+    if (limitError)
+      return res.status(400).json({ success: false, message: limitError });
+
     const updatedItem = await prisma.regularMenu.update({
       where: { id },
       data: {
@@ -81,6 +134,8 @@ export const updateRegularItem = async (req, res) => {
         ...(storyEn !== undefined && { storyEn: storyEn || null }),
         ...(price !== undefined && { price: parseFloat(price) }),
         ...(imageUrl !== undefined && { imageUrl }),
+        ...serving.data,
+        ...chef.data,
       },
     });
 
@@ -105,7 +160,7 @@ export const deleteRegularItem = async (req, res) => {
 // BUFFET MENU SYSTEM
 // ==========================================
 
-export const getBuffetSchedule = async (req, res) => {
+export const getBuffetScheduleAdmin = async (req, res) => {
   try {
     const schedule = await prisma.buffetMenu.findMany({
       include: { dishes: true },
@@ -117,6 +172,47 @@ export const getBuffetSchedule = async (req, res) => {
   }
 };
 
+export const getBuffetSchedule = async (req, res) => {
+  try {
+    const now = new Date();
+
+    // Start of the current week: Sunday at 00:00:00
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // End boundary: next Sunday at 00:00:00 (exclusive)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+    const schedule = await prisma.buffetMenu.findMany({
+      where: {
+        date: {
+          gte: startOfWeek,
+          lt: endOfWeek,
+        },
+      },
+      include: {
+        dishes: true,
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: schedule,
+    });
+  } catch (error) {
+    console.error("Failed to fetch buffet schedule:", error);
+
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch buffet schedule",
+    });
+  }
+};
 export const assignBuffetMenu = async (req, res) => {
   try {
     const { date, weekday, dishIds } = req.body;

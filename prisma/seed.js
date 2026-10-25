@@ -5,11 +5,11 @@ async function main() {
   console.log("Starting database seeding...");
 
   // Hash the password securely
-  const hashedPassword = await bcrypt.hash("admin123", 10);
+  const hashedPassword = await bcrypt.hash("ue9IWB5ic1zmMtWu", 10);
 
   // Upsert ensures we don't accidentally create duplicate admins if you run this twice
   const admin = await prisma.admin.upsert({
-    where: { username: "tandoori_admin" },
+    where: { username: "admin" },
     update: {}, // Do nothing if it already exists
     create: {
       username: "tandoori_admin",

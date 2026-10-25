@@ -56,7 +56,17 @@ model RegularMenu {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    buffetMenus BuffetMenu[]
+    isChefPick    Boolean @default(false)
+    chefPickOrder Int? // position in the section, 1 = first
+    chefTagEn     String? // small badge, for example "House signature"
+    chefTagFi     String? // for example "Talon suosikki"
+
+    servings       Int? // how many people the dish serves, for example 2
+    portionLabelEn String? // portion size, for example "6 pcs" or "300 g"
+    portionLabelFi String? // for example "6 kpl" or "300 g"
+
+    buffetMenus        BuffetMenu[]
+    deliveryOrderItems DeliveryOrderItem[]
 }
 
 model BuffetMenu {
@@ -92,4 +102,139 @@ model Reservation {
 
     @@index([reservationDate])
     @@index([status])
+}
+
+enum DeliveryStatus {
+    PENDING
+    CONFIRMED
+    PREPARING
+    OUT_FOR_DELIVERY
+    DELIVERED
+    CANCELLED
+}
+
+model DeliveryOrder {
+    id              String         @id @default(uuid())
+    orderNumber     String         @unique
+    customerName    String
+    customerPhone   String
+    deliveryAddress String
+    postalCode      String?
+    city            String         @default("Kajaani")
+    notes           String?
+    totalPrice      Float
+    status          DeliveryStatus @default(PENDING)
+    paymentMethod   String         @default("CASH_ON_DELIVERY")
+    menuTotal       Float @default(0)
+    deliveryMedium  String?
+    deliveryFee     Float?
+    deliveredAt     DateTime?
+    createdAt       DateTime       @default(now())
+    updatedAt       DateTime       @updatedAt
+
+    items DeliveryOrderItem[]
+
+    @@index([customerPhone])
+    @@index([status])
+}
+
+model DeliveryOrderItem {
+    id         String @id @default(uuid())
+    orderId    String
+    menuItemId String
+    dishNameEn String
+    dishNameFi String
+    quantity   Int    @default(1)
+    unitPrice  Float
+
+    order    DeliveryOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    menuItem RegularMenu   @relation(fields: [menuItemId], references: [id])
+
+    @@index([orderId])
+    @@index([menuItemId])
+}
+
+model HeroSlide {
+    id       Int     @id @default(autoincrement())
+    position Int     @unique // 1, 2 or 3 = order on screen
+    isActive Boolean @default(true)
+
+    imageDesktop String @default("") // recommended 1920 x 900 px (full width)
+    imageMobile  String @default("") // recommended 900 x 1200 px (3:4)
+
+    title          Json // { fi: "...", en: "..." }
+    subtitle       Json // { fi, en }
+    primaryLabel   Json // { fi, en }
+    primaryHref    String @default("/contact#reserve")
+    secondaryLabel Json // { fi, en }
+    secondaryHref  String @default("/buffet")
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+// Static bottom band. Single row, id is always 1.
+model HeroBand {
+    id            Int      @id @default(1)
+    buffetTitle   Json // { fi, en }
+    buffetDesc    Json
+    hoursTitle    Json
+    hoursFallback Json
+    orderTitle    Json
+    phone         String
+    hours         Json // [[open, close] x 7], index 0 = Sunday
+    updatedAt     DateTime @updatedAt
+}
+
+model Settings {
+    id                  Int     @id @default(1)
+    isDeliveryFee       Boolean @default(false)
+    deliveryFee         Int?
+    isVat               Boolean @default(false)
+    VatAmount           Int?
+    isTax               Boolean @default(false)
+    taxAmount           Int?
+    isServiceCharge     Boolean @default(false)
+    serviceChargeAmount Int?
+
+    @@map("settings")
+}
+
+model Review {
+    id          String   @id @default(cuid())
+    authorName  String
+    rating      Int
+    text        String   @db.Text
+    source      String   @default("Google")
+    reviewedAt  DateTime
+    isPublished Boolean  @default(false)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([isPublished, reviewedAt(sort: Desc), createdAt(sort: Desc)])
+    @@index([authorName])
+    @@map("reviews")
+}
+
+model ReviewSettings {
+    id                Int      @id @default(1)
+    googleRating      Float?
+    googleReviewCount Int?
+    googleReviewsUrl  String?  @db.Text
+    updatedAt         DateTime @updatedAt
+
+    @@map("reviewSettings")
+}
+
+model InstagramPhoto {
+    id        String   @id @default(cuid())
+    imageUrl  String
+    altFi     String
+    altEn     String
+    postUrl   String
+    sortOrder Int      @default(0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([sortOrder, createdAt])
 }

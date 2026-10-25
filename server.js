@@ -7,6 +7,10 @@ import contactRoutes from "./src/routes/contactRoutes.js";
 import reservationRoutes from "./src/routes/reservationRoutes.js";
 import cors from "cors";
 import { startBuffetCleanupCron } from "./src/jobs/cleanupBuffet.js";
+import deliveryRoutes from "./src/routes/deliveryRoutes.js";
+import { publicHeroRoutes, adminHeroRoutes } from "./src/routes/heroRoutes.js";
+import { instagramRouter, reviewRouter } from "./src/routes/reviewRoutes.js";
+import settingsRoutes from "./src/routes/settingsRoutes.js";
 
 const app = express();
 //clean up buffet menu
@@ -39,6 +43,12 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/reservations", reservationRoutes);
+app.use("/api/delivery", deliveryRoutes);
+app.use("/api/hero", publicHeroRoutes);
+app.use("/api/admin/hero", adminHeroRoutes);
+app.use("/api/reviews", reviewRouter);
+app.use("/api/instagram", instagramRouter);
+app.use("/api/settings", settingsRoutes);
 
 app.get("/", (req, res) => {
   res.json({
