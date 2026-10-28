@@ -1,6 +1,6 @@
 // Two small route files. Create routes/reviewRoutes.js and routes/instagramRoutes.js, or add these to your own.
 import express from "express";
-import verifyToken from "../middlewares/auth.js";
+import verifyToken from "../middlewares/verifyToken.js";
 
 // ---------------------------------------------------------------- routes/reviewRoutes.js
 import {

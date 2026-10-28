@@ -1,5 +1,5 @@
 import { Router } from "express";
-import verifyToken from "../middlewares/auth.js";
+import verifyToken from "../middlewares/verifyToken.js";
 import {
   getRegularMenu,
   getBuffetSchedule,

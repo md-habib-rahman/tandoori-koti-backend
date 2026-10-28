@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import * as hero from "../controllers/heroController.js";
 // Use whatever auth middleware you already have for admin routes:
-import verifyToken from "../middlewares/auth.js";
+import verifyToken from "../middlewares/verifyToken.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),

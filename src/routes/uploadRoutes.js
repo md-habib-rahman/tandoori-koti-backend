@@ -1,6 +1,6 @@
 import upload from "../middlewares/upload.js";
 import { Router } from "express";
-import verifyToken from "../middlewares/auth.js";
+import verifyToken from "../middlewares/verifyToken.js";
 import { uploadImage } from "../controllers/uploadController.js";
 
 const router = Router();

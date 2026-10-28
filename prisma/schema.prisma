@@ -10,10 +10,18 @@ datasource db {
 // --------------------------------------
 // ADMIN USER
 // --------------------------------------
+enum userRole {
+    ADMIN
+    USER
+}
+
 model Admin {
     id        String   @id @default(uuid())
+    fullName  String?
     username  String   @unique
     password  String
+    userRole  userRole @default(USER)
+    isAtive   Boolean  @default(false)
     createdAt DateTime @default(now())
 }
 
@@ -190,13 +198,16 @@ model Settings {
     id                  Int     @id @default(1)
     isDeliveryFee       Boolean @default(false)
     isEnableDelivery    Boolean @default(false)
-    deliveryFee         Int?
+    deliveryFee         Float?
     isVat               Boolean @default(false)
-    VatAmount           Int?
+    VatAmount           Float?
     isTax               Boolean @default(false)
-    taxAmount           Int?
+    taxAmount           Float?
     isServiceCharge     Boolean @default(false)
-    serviceChargeAmount Int?
+    serviceChargeAmount Float?
+    lunchBuffetPrice    Float?
+    lunchChildPrice     Float?
+    luchTakewayPrice    Float?
 
     @@map("settings")
 }

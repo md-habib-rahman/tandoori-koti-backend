@@ -10,6 +10,9 @@ const DEFAULT_SETTINGS = {
   taxAmount: null,
   isServiceCharge: false,
   serviceChargeAmount: null,
+  lunchBuffetPrice: null,
+  lunchChildPrice: null,
+  luchTakewayPrice: null,
 };
 
 const BOOLEAN_FIELDS = ["isDeliveryFee", "isVat", "isTax", "isServiceCharge"];
@@ -19,6 +22,9 @@ const AMOUNT_FIELDS = [
   "VatAmount",
   "taxAmount",
   "serviceChargeAmount",
+  "lunchBuffetPrice",
+  "lunchChildPrice",
+  "luchTakewayPrice",
 ];
 
 const REQUIRED_AMOUNT_BY_TOGGLE = {
@@ -44,12 +50,8 @@ function validateSettings(body) {
       continue;
     }
 
-    if (
-      typeof value !== "number" ||
-      !Number.isSafeInteger(value) ||
-      value < 0
-    ) {
-      errors.push(`${field} must be a non-negative whole number or null.`);
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+      errors.push(`${field} must be a non-negative number or null.`);
     }
   }
 
@@ -73,6 +75,18 @@ function normalizeSettings(body) {
   return {
     isDeliveryFee: body.isDeliveryFee,
     isEnableDelivery: body.isEnableDelivery,
+    lunchBuffetPrice:
+      body.lunchBuffetPrice === "" || body.lunchBuffetPrice == null
+        ? null
+        : body.lunchBuffetPrice,
+    lunchChildPrice:
+      body.lunchChildPrice === "" || body.lunchChildPrice == null
+        ? null
+        : body.lunchChildPrice,
+    luchTakewayPrice:
+      body.luchTakewayPrice === "" || body.luchTakewayPrice == null
+        ? null
+        : body.luchTakewayPrice,
     deliveryFee:
       body.deliveryFee === "" || body.deliveryFee == null
         ? null

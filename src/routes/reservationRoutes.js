@@ -5,7 +5,7 @@ import {
   updateReservationStatus,
   deleteReservation,
 } from "../controllers/reservationController.js";
-import verifyToken from "../middlewares/auth.js";
+import verifyToken from "../middlewares/verifyToken.js";
 import verifyCaptcha from "../middlewares/verifyCaptcha.js";
 const router = Router();
 

@@ -11,6 +11,7 @@ import deliveryRoutes from "./src/routes/deliveryRoutes.js";
 import { publicHeroRoutes, adminHeroRoutes } from "./src/routes/heroRoutes.js";
 import { instagramRouter, reviewRouter } from "./src/routes/reviewRoutes.js";
 import settingsRoutes from "./src/routes/settingsRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
 
 const app = express();
 //clean up buffet menu
@@ -49,6 +50,7 @@ app.use("/api/admin/hero", adminHeroRoutes);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/instagram", instagramRouter);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.json({

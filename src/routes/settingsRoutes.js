@@ -3,7 +3,8 @@ import {
   getSettings,
   updateSettings,
 } from "../controllers/settingsController.js";
-import verifyToken from "../middlewares/auth.js";
+import verifyToken from "../middlewares/verifyToken.js";
+
 
 
 const settingsRoutes = Router();

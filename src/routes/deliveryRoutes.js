@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createDeliveryOrder } from "../controllers/deliveryController.js";
 import { contactRateLimiter } from "../middlewares/contactRateLimiter.js";
 import verifyRecaptcha from "../middlewares/verifyCaptcha.js";
-import verifyToken from "../middlewares/auth.js";
+import verifyToken from "../middlewares/verifyToken.js";
 // import { verifyToken } from "../middlewares/auth.js";
 import {
   getDeliveryBoard,

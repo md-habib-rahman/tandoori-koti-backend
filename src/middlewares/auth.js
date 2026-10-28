@@ -1,40 +1,54 @@
-import dotenv from "dotenv";
-dotenv.config();
-import jwt from "jsonwebtoken";
+import prisma from "../config/db.js";
+import verifyToken from "./verifyToken.js";
 
-const verifyToken = (req, res, next) => {
-  try {
-    // 1. Check for the Authorization header
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res
-        .status(401)
-        .json({ error: "Access denied. No token provided." });
-    }
-
-    // 2. Extract the token
-    const token = authHeader.split(" ")[1];
-
-    // 3. Verify the token against your secret
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // 4. Attach the decoded payload (adminId, username) to the request object
-    req.admin = decoded;
-
-    // 5. Proceed to the next middleware or controller
-    next();
-  } catch (error) {
-    console.error("JWT Verification Error:", error.message);
-
-    if (error.name === "TokenExpiredError") {
-      return res
-        .status(401)
-        .json({ error: "Session expired. Please log in again." });
-    }
-
-    return res.status(403).json({ error: "Invalid token." });
-  }
+const USER_SELECT = {
+  id: true,
+  fullName: true,
+  username: true,
+  userRole: true,
+  isAtive: true,
+  createdAt: true,
 };
 
-export default verifyToken;
+// Runs after verifyToken. The token only holds { adminId, username }, so role and
+// active status are read from the database on every request. A role change, a
+// deactivated account or a deleted user therefore takes effect immediately,
+// even for tokens that were issued before the new fields existed.
+export async function loadUser(req, res, next) {
+  try {
+    const id = req.admin?.adminId ?? req.admin?.id;
+    const user = id
+      ? await prisma.admin.findUnique({ where: { id }, select: USER_SELECT })
+      : null;
+
+    if (!user)
+      return res
+        .status(401)
+        .json({ error: "Account no longer exists. Please log in again." });
+    if (!user.isAtive)
+      return res
+        .status(403)
+        .json({ error: "Your account is inactive. Contact an administrator." });
+
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not verify account" });
+  }
+}
+
+// Login check = your verifyToken + loading the user. Express accepts an array here.
+export const requireAuth = [verifyToken, loadUser];
+
+// Put after requireAuth:  router.use(requireAuth, requireRole("ADMIN"))
+export const requireRole =
+  (...roles) =>
+  (req, res, next) =>
+    roles.includes(req.user?.userRole)
+      ? next()
+      : res
+          .status(403)
+          .json({ error: "You do not have permission to do this." });
+
+export const requireAdmin = requireRole("ADMIN"); // also used by the hero routes
